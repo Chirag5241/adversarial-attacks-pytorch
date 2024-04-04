@@ -190,7 +190,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -208,7 +209,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -227,7 +229,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -249,7 +252,8 @@ class FAB(Attack):
                     if self.norm == "Linf":
                         dist1 = df.abs() / (
                             1e-12
-                            + dg.abs().view(dg.shape[0], dg.shape[1], -1).sum(dim=-1)
+                            + dg.abs().view(dg.shape[0],
+                                            dg.shape[1], -1).sum(dim=-1)
                         )
                     elif self.norm == "L2":
                         dist1 = df.abs() / (
@@ -270,7 +274,8 @@ class FAB(Attack):
                         raise ValueError("norm not supported")
                     ind = dist1.min(dim=1)[1]
                     dg2 = dg[u1, ind]
-                    b = -df[u1, ind] + (dg2 * x1).view(x1.shape[0], -1).sum(dim=-1)
+                    b = -df[u1, ind] + \
+                        (dg2 * x1).view(x1.shape[0], -1).sum(dim=-1)
                     w = dg2.reshape([bs, -1])
 
                     if self.norm == "Linf":
@@ -312,7 +317,8 @@ class FAB(Attack):
                             .sum(dim=1, keepdim=True)
                             .view(-1, *[1] * self.ndims)
                         )
-                    a0 = torch.max(a0, 1e-8 * torch.ones(a0.shape).to(self.device))
+                    a0 = torch.max(
+                        a0, 1e-8 * torch.ones(a0.shape).to(self.device))
                     a1 = a0[:bs]
                     a2 = a0[-bs:]
                     alpha = torch.min(
@@ -364,7 +370,8 @@ class FAB(Attack):
                             + res2[ind_adv] * (t >= res2[ind_adv]).float()
                         )
                         x1[ind_adv] = (
-                            im2[ind_adv] + (x1[ind_adv] - im2[ind_adv]) * self.beta
+                            im2[ind_adv] +
+                            (x1[ind_adv] - im2[ind_adv]) * self.beta
                         )
 
                     counter_iter += 1
@@ -446,7 +453,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -464,7 +472,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -483,7 +492,8 @@ class FAB(Attack):
                         im2
                         + (
                             torch.min(
-                                res2, self.eps * torch.ones(res2.shape).to(self.device)
+                                res2, self.eps *
+                                torch.ones(res2.shape).to(self.device)
                             ).reshape([-1, *[1] * self.ndims])
                         )
                         * t
@@ -496,8 +506,6 @@ class FAB(Attack):
                         / 2
                     )
 
-                x1 = x1.clamp(0.0, 1.0)
-
             counter_iter = 0
             while counter_iter < self.steps:
                 with torch.no_grad():
@@ -507,7 +515,8 @@ class FAB(Attack):
                     if self.norm == "Linf":
                         dist1 = df.abs() / (
                             1e-12
-                            + dg.abs().view(dg.shape[0], dg.shape[1], -1).sum(dim=-1)
+                            + dg.abs().view(dg.shape[0],
+                                            dg.shape[1], -1).sum(dim=-1)
                         )
                     elif self.norm == "L2":
                         dist1 = df.abs() / (
@@ -529,7 +538,8 @@ class FAB(Attack):
                     ind = dist1.min(dim=1)[1]
 
                     dg2 = dg[u1, ind]
-                    b = -df[u1, ind] + (dg2 * x1).view(x1.shape[0], -1).sum(dim=-1)
+                    b = -df[u1, ind] + \
+                        (dg2 * x1).view(x1.shape[0], -1).sum(dim=-1)
                     w = dg2.reshape([bs, -1])
 
                     if self.norm == "Linf":
@@ -571,7 +581,8 @@ class FAB(Attack):
                             .sum(dim=1, keepdim=True)
                             .view(-1, *[1] * self.ndims)
                         )
-                    a0 = torch.max(a0, 1e-8 * torch.ones(a0.shape).to(self.device))
+                    a0 = torch.max(
+                        a0, 1e-8 * torch.ones(a0.shape).to(self.device))
                     a1 = a0[:bs]
                     a2 = a0[-bs:]
                     alpha = torch.min(
@@ -623,7 +634,8 @@ class FAB(Attack):
                             + res2[ind_adv] * (t >= res2[ind_adv]).float()
                         )
                         x1[ind_adv] = (
-                            im2[ind_adv] + (x1[ind_adv] - im2[ind_adv]) * self.beta
+                            im2[ind_adv] +
+                            (x1[ind_adv] - im2[ind_adv]) * self.beta
                         )
 
                     counter_iter += 1
@@ -670,14 +682,17 @@ class FAB(Attack):
 
                         if targeted:
                             adv_curr = self.attack_single_run_targeted(
-                                x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                                x_to_fool, y_to_fool, use_rand_start=(
+                                    counter > 0)
                             )
                         else:
                             adv_curr = self.attack_single_run(
-                                x_to_fool, y_to_fool, use_rand_start=(counter > 0)
+                                x_to_fool, y_to_fool, use_rand_start=(
+                                    counter > 0)
                             )
 
-                        acc_curr = self.get_logits(adv_curr).max(1)[1] == y_to_fool
+                        acc_curr = self.get_logits(adv_curr).max(1)[
+                            1] == y_to_fool
                         if self.norm == "Linf":
                             res = (
                                 (x_to_fool - adv_curr)
@@ -769,7 +784,8 @@ def projection_linf(points_to_project, w_hyperplane, b_hyperplane):
         counter2 = counter4.long().unsqueeze(1)
         indcurr = indp_.gather(1, indp_.size(1) - 1 - counter2)
         b2 = (
-            sb_.gather(1, counter2) - s_.gather(1, counter2) * p_.gather(1, indcurr)
+            sb_.gather(1, counter2) - s_.gather(1, counter2) *
+                       p_.gather(1, indcurr)
         ).squeeze(
             1
         )  # nopep8
@@ -786,7 +802,8 @@ def projection_linf(points_to_project, w_hyperplane, b_hyperplane):
         ).unsqueeze(-1)
         d[c_l] = (2 * a[c_l] - 1) * lmbd_opt
 
-    lmbd_opt = torch.clamp_min((b[c2] - sb[c2, lb]) / (-s[c2, lb]), min=0).unsqueeze(-1)
+    lmbd_opt = torch.clamp_min(
+        (b[c2] - sb[c2, lb]) / (-s[c2, lb]), min=0).unsqueeze(-1)
     d[c2] = torch.min(lmbd_opt, d[c2]) * a[c2] + torch.max(-lmbd_opt, d[c2]) * (
         1 - a[c2]
     )
@@ -817,7 +834,8 @@ def projection_l2(points_to_project, w_hyperplane, b_hyperplane):
     d = -(r * w)
     d.mul_((w.abs() > 1e-8).float())
     s = torch.cat(
-        (-w5 * rs[:, 0:1], torch.cumsum((-rs2 + rs) * ws, dim=1) - w5 * rs[:, 0:1]), 1
+        (-w5 * rs[:, 0:1], torch.cumsum((-rs2 + rs)
+         * ws, dim=1) - w5 * rs[:, 0:1]), 1
     )
 
     c4 = s[:, 0] + c < 0
@@ -889,7 +907,8 @@ def projection_l1(points_to_project, w_hyperplane, b_hyperplane):
     if c2.any():
         indr = indr[c2].gather(1, lb2.unsqueeze(1)).squeeze(1)
         u = torch.arange(0, w.shape[0], device=device).unsqueeze(1)
-        u2 = torch.arange(0, w.shape[1], device=device, dtype=torch.float).unsqueeze(0)
+        u2 = torch.arange(0, w.shape[1], device=device,
+                          dtype=torch.float).unsqueeze(0)
         alpha = -s[c2, lb2] / w[c2, indr]
         c5 = u2 < lb.unsqueeze(-1)
         u3 = c5[u[: c5.shape[0]], indr_rev[c2]]

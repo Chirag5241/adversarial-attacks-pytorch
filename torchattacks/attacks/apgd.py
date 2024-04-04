@@ -89,6 +89,12 @@ class APGD(Attack):
         x_sorted, ind_sorted = x.sort(dim=1)
         ind = (ind_sorted[:, -1] == y).float()
 
+        if x.shape[1] <= 2:
+            print(
+                "dlr cannot be implemented for 2 classes, need 3 minimum, using crossentropy loss")
+            loss_fn = nn.CrossEntropyLoss(reduction="none")
+            return loss_fn(x, y)
+
         return -(
             x[np.arange(x.shape[0]), y]
             - x_sorted[:, -2] * ind
@@ -96,7 +102,8 @@ class APGD(Attack):
         ) / (x_sorted[:, -1] - x_sorted[:, -3] + 1e-12)
 
     def attack_single_run(self, x_in, y_in):
-        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(0)
+        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone(
+        ).unsqueeze(0)
         y = y_in.clone() if len(y_in.shape) == 1 else y_in.clone().unsqueeze(0)
 
         self.steps_2, self.steps_min, self.size_decr = (
@@ -126,7 +133,7 @@ class APGD(Attack):
             ).detach() * t / (
                 (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
-        x_adv = x_adv.clamp(0.0, 1.0)
+        # x_adv = x_adv.clamp(0.0, 1.0)     # Clamp removed as we are dealing with embeddings
         x_best = x_adv.clone()
         x_best_adv = x_adv.clone()
         loss_steps = torch.zeros([self.steps, x.shape[0]])
@@ -134,8 +141,10 @@ class APGD(Attack):
         acc_steps = torch.zeros_like(loss_best_steps)
 
         if self.loss == "ce":
+            print("Cross Entropy loss")
             criterion_indiv = nn.CrossEntropyLoss(reduction="none")
         elif self.loss == "dlr":
+            print("dlr loss")
             criterion_indiv = self.dlr_loss
         else:
             raise ValueError("unknown loss")
@@ -171,7 +180,8 @@ class APGD(Attack):
         counter3 = 0
 
         loss_best_last_check = loss_best.clone()
-        reduced_last_check = np.zeros(loss_best.shape) == np.zeros(loss_best.shape)
+        reduced_last_check = np.zeros(
+            loss_best.shape) == np.zeros(loss_best.shape)
 
         # n_reduced = 0
         for i in range(self.steps):
@@ -185,21 +195,15 @@ class APGD(Attack):
 
                 if self.norm == "Linf":
                     x_adv_1 = x_adv + step_size * torch.sign(grad)
-                    x_adv_1 = torch.clamp(
-                        torch.min(torch.max(x_adv_1, x - self.eps), x + self.eps),
-                        0.0,
-                        1.0,
-                    )
-                    x_adv_1 = torch.clamp(
-                        torch.min(
-                            torch.max(
-                                x_adv + (x_adv_1 - x_adv) * a + grad2 * (1 - a),
-                                x - self.eps,
-                            ),
-                            x + self.eps,
+                    x_adv_1 = torch.min(torch.max(x_adv_1, x - self.eps),
+                                        x + self.eps)
+                    x_adv_1 = torch.min(
+                        torch.max(
+                            x_adv + (x_adv_1 - x_adv) *
+                            a + grad2 * (1 - a),
+                            x - self.eps,
                         ),
-                        0.0,
-                        1.0,
+                        x + self.eps,
                     )
 
                 elif self.norm == "L2":
@@ -210,11 +214,13 @@ class APGD(Attack):
                         x
                         + (x_adv_1 - x)
                         / (
-                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3),
+                             keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x.shape).to(self.device).detach(),
+                            self.eps *
+                                torch.ones(x.shape).to(self.device).detach(),
                             ((x_adv_1 - x) ** 2)
                             .sum(dim=(1, 2, 3), keepdim=True)
                             .sqrt(),
@@ -227,12 +233,15 @@ class APGD(Attack):
                         x
                         + (x_adv_1 - x)
                         / (
-                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3),
+                             keepdim=True).sqrt()
                             + 1e-12
                         )
                         * torch.min(
-                            self.eps * torch.ones(x.shape).to(self.device).detach(),
-                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt()
+                            self.eps *
+                                torch.ones(x.shape).to(self.device).detach(),
+                            ((x_adv_1 - x) ** 2).sum(dim=(1, 2, 3),
+                             keepdim=True).sqrt()
                             + 1e-12,
                         ),
                         0.0,
@@ -308,7 +317,9 @@ class APGD(Attack):
 
     def perturb(self, x_in, y_in, best_loss=False, cheap=True):
         assert self.norm in ["Linf", "L2"]
-        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(0)
+
+        x = x_in.clone() if len(x_in.shape) == 4 else x_in.clone().unsqueeze(
+            0)
         y = y_in.clone() if len(y_in.shape) == 1 else y_in.clone().unsqueeze(0)
 
         adv = x.clone()

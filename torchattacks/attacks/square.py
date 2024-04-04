@@ -147,10 +147,11 @@ class Square(Attack):
         counter2 = [x_c - 1, y_c - 1]
         for counter in range(0, max(x_c, y_c)):
             delta[
-                max(counter2[0], 0) : min(counter2[0] + (2 * counter + 1), x),
-                max(0, counter2[1]) : min(counter2[1] + (2 * counter + 1), y),
+                max(counter2[0], 0): min(counter2[0] + (2 * counter + 1), x),
+                max(0, counter2[1]): min(counter2[1] + (2 * counter + 1), y),
             ] += (
-                1.0 / (torch.Tensor([counter + 1]).view(1, 1).to(self.device) ** 2)
+                1.0 / (torch.Tensor([counter + 1]
+                       ).view(1, 1).to(self.device) ** 2)
             )  # nopep8
             counter2[0] -= 1
             counter2[1] -= 1
@@ -162,7 +163,7 @@ class Square(Attack):
     def eta(self, s):
         delta = torch.zeros([s, s]).to(self.device)
         delta[: s // 2] = self.eta_rectangles(s // 2, s)
-        delta[s // 2 :] = -1.0 * self.eta_rectangles(s - s // 2, s)
+        delta[s // 2:] = -1.0 * self.eta_rectangles(s - s // 2, s)
         delta /= (delta ** 2).sum(dim=(0, 1), keepdim=True).sqrt()
         if torch.rand([1]) > 0.5:
             delta = delta.permute([1, 0])
@@ -206,9 +207,7 @@ class Square(Attack):
             n_ex_total = x.shape[0]
 
             if self.norm == "Linf":
-                x_best = torch.clamp(
-                    x + self.eps * self.random_choice([x.shape[0], c, 1, w]), 0.0, 1.0
-                )
+                x_best = x + self.eps * self.random_choice([x.shape[0], c, 1, w])
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
                 n_queries = torch.ones(x.shape[0]).to(self.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
@@ -232,7 +231,7 @@ class Square(Attack):
                     vh = self.random_int(0, h - s)
                     vw = self.random_int(0, w - s)
                     new_deltas = torch.zeros([c, h, w]).to(self.device)
-                    new_deltas[:, vh : vh + s, vw : vw + s] = (
+                    new_deltas[:, vh: vh + s, vw: vw + s] = (
                         2.0 * self.eps * self.random_choice([c, 1, 1])
                     )
 
@@ -240,7 +239,7 @@ class Square(Attack):
                     x_new = torch.min(
                         torch.max(x_new, x_curr - self.eps), x_curr + self.eps
                     )
-                    x_new = torch.clamp(x_new, 0.0, 1.0)
+                    x_new = x_new
                     x_new = self.check_shape(x_new)
 
                     margin, loss = self.margin_and_loss(x_new, y_curr)
@@ -249,7 +248,8 @@ class Square(Attack):
                     idx_improved = (loss < loss_min_curr).float()
 
                     loss_min[idx_to_fool] = (
-                        idx_improved * loss + (1.0 - idx_improved) * loss_min_curr
+                        idx_improved * loss +
+                        (1.0 - idx_improved) * loss_min_curr
                     )
 
                     # update margin and x_best if new loss is better
@@ -258,11 +258,14 @@ class Square(Attack):
                     idx_improved = torch.max(idx_improved, idx_miscl)
 
                     margin_min[idx_to_fool] = (
-                        idx_improved * margin + (1.0 - idx_improved) * margin_min_curr
+                        idx_improved * margin +
+                        (1.0 - idx_improved) * margin_min_curr
                     )
-                    idx_improved = idx_improved.reshape([-1, *[1] * len(x.shape[:-1])])
+                    idx_improved = idx_improved.reshape(
+                        [-1, *[1] * len(x.shape[:-1])])
                     x_best[idx_to_fool] = (
-                        idx_improved * x_new + (1.0 - idx_improved) * x_best_curr
+                        idx_improved * x_new +
+                        (1.0 - idx_improved) * x_best_curr
                     )
                     n_queries[idx_to_fool] += 1.0
 
@@ -295,15 +298,13 @@ class Square(Attack):
                 for _ in range(h // s):
                     vw = sp_init + 0
                     for _ in range(w // s):
-                        delta_init[:, :, vh : vh + s, vw : vw + s] += self.eta(s).view(
+                        delta_init[:, :, vh: vh + s, vw: vw + s] += self.eta(s).view(
                             1, 1, s, s
                         ) * self.random_choice([x.shape[0], c, 1, 1])
                         vw += s
                     vh += s
 
-                x_best = torch.clamp(
-                    x + self.normalize_delta(delta_init) * self.eps, 0.0, 1.0
-                )
+                x_best = x + self.normalize_delta(delta_init) * self.eps
                 margin_min, loss_min = self.margin_and_loss(x_best, y)
                 n_queries = torch.ones(x.shape[0]).to(self.device)
                 s_init = int(math.sqrt(self.p_init * n_features / c))
@@ -331,9 +332,9 @@ class Square(Attack):
                     vh = self.random_int(0, h - s)
                     vw = self.random_int(0, w - s)
                     new_deltas_mask = torch.zeros_like(x_curr)
-                    new_deltas_mask[:, :, vh : vh + s, vw : vw + s] = 1.0
+                    new_deltas_mask[:, :, vh: vh + s, vw: vw + s] = 1.0
                     norms_window_1 = (
-                        (delta_curr[:, :, vh : vh + s, vw : vw + s] ** 2)
+                        (delta_curr[:, :, vh: vh + s, vw: vw + s] ** 2)
                         .sum(dim=(-2, -1), keepdim=True)
                         .sqrt()
                     )
@@ -341,17 +342,18 @@ class Square(Attack):
                     vh2 = self.random_int(0, h - s)
                     vw2 = self.random_int(0, w - s)
                     new_deltas_mask_2 = torch.zeros_like(x_curr)
-                    new_deltas_mask_2[:, :, vh2 : vh2 + s, vw2 : vw2 + s] = 1.0
+                    new_deltas_mask_2[:, :, vh2: vh2 + s, vw2: vw2 + s] = 1.0
 
                     norms_image = self.lp_norm(x_best_curr - x_curr)
                     mask_image = torch.max(new_deltas_mask, new_deltas_mask_2)
                     norms_windows = self.lp_norm(delta_curr * mask_image)
 
-                    new_deltas = torch.ones([x_curr.shape[0], c, s, s]).to(self.device)
+                    new_deltas = torch.ones(
+                        [x_curr.shape[0], c, s, s]).to(self.device)
                     new_deltas *= self.eta(s).view(1, 1, s, s) * self.random_choice(
                         [x_curr.shape[0], c, 1, 1]
                     )
-                    old_deltas = delta_curr[:, :, vh : vh + s, vw : vw + s] / (
+                    old_deltas = delta_curr[:, :, vh: vh + s, vw: vw + s] / (
                         1e-12 + norms_window_1
                     )
                     new_deltas += old_deltas
@@ -359,7 +361,8 @@ class Square(Attack):
                         new_deltas
                         / (
                             1e-12
-                            + (new_deltas ** 2).sum(dim=(-2, -1), keepdim=True).sqrt()
+                            + (new_deltas ** 2).sum(dim=(-2, -1),
+                                                    keepdim=True).sqrt()
                         )
                         * (
                             torch.max(
@@ -371,12 +374,10 @@ class Square(Attack):
                             + norms_windows ** 2
                         ).sqrt()
                     )
-                    delta_curr[:, :, vh2 : vh2 + s, vw2 : vw2 + s] = 0.0
-                    delta_curr[:, :, vh : vh + s, vw : vw + s] = new_deltas + 0
+                    delta_curr[:, :, vh2: vh2 + s, vw2: vw2 + s] = 0.0
+                    delta_curr[:, :, vh: vh + s, vw: vw + s] = new_deltas + 0
 
-                    x_new = torch.clamp(
-                        x_curr + self.normalize_delta(delta_curr) * self.eps, 0.0, 1.0
-                    )
+                    x_new = x_curr + self.normalize_delta(delta_curr) * self.eps
                     x_new = self.check_shape(x_new)
                     norms_image = self.lp_norm(x_new - x_curr)
 
@@ -386,7 +387,8 @@ class Square(Attack):
                     idx_improved = (loss < loss_min_curr).float()
 
                     loss_min[idx_to_fool] = (
-                        idx_improved * loss + (1.0 - idx_improved) * loss_min_curr
+                        idx_improved * loss +
+                        (1.0 - idx_improved) * loss_min_curr
                     )
 
                     # update margin and x_best if new loss is better
@@ -395,11 +397,14 @@ class Square(Attack):
                     idx_improved = torch.max(idx_improved, idx_miscl)
 
                     margin_min[idx_to_fool] = (
-                        idx_improved * margin + (1.0 - idx_improved) * margin_min_curr
+                        idx_improved * margin +
+                        (1.0 - idx_improved) * margin_min_curr
                     )
-                    idx_improved = idx_improved.reshape([-1, *[1] * len(x.shape[:-1])])
+                    idx_improved = idx_improved.reshape(
+                        [-1, *[1] * len(x.shape[:-1])])
                     x_best[idx_to_fool] = (
-                        idx_improved * x_new + (1.0 - idx_improved) * x_best_curr
+                        idx_improved * x_new +
+                        (1.0 - idx_improved) * x_best_curr
                     )
                     n_queries[idx_to_fool] += 1.0
 
