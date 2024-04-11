@@ -1,4 +1,4 @@
-# Adversarial-Attacks-PyTorch
+# Adversarial-Attacks-PyTorch | fork: Causal Probing
 
 <p>
   <a href="https://github.com/Harry24k/adversarial-attacks-pytorch/blob/master/LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/Harry24k/adversarial-attacks-pytorch?&color=brightgreen" /></a>
@@ -10,7 +10,7 @@
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
-<strong>Torchattacks  is a PyTorch library that provides adversarial attacks to generate adversarial examples.</strong> 
+<strong>Torchattacks is a PyTorch library that provides adversarial attacks to generate adversarial examples.</strong> 
 
 It contains *PyTorch-like* interface and functions that make it easier for PyTorch users to implement adversarial attacks.
 
@@ -22,6 +22,8 @@ atk = torchattacks.PGD(model, eps=8/255, alpha=2/255, steps=4)
 # atk.set_normalization_used(mean=[...], std=[...])
 adv_images = atk(images, labels)
 ```
+
+<strong>Our torchattacks fork adapts the implementation provided in the [original torchattacks repository](https://github.com/Harry24k/adversarial-attacks-pytorch) to the context of causal probing.</strong>
 
 **Additional Recommended Packages**.
 

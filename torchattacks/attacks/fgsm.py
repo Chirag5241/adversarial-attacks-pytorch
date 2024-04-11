@@ -59,5 +59,7 @@ class FGSM(Attack):
         )[0]
 
         adv_images = images + self.eps * grad.sign()
+        # adv_images = torch.clamp(adv_images, min=0, max=1).detach()     # pixel-value clamp removed as we are dealing with embeddings, not images
+        adv_images = adv_images.detach()
 
         return adv_images

@@ -56,7 +56,8 @@ class PGD(Attack):
             adv_images = adv_images + torch.empty_like(adv_images).uniform_(
                 -self.eps, self.eps
             )
-            adv_images = torch.clamp(adv_images, min=0, max=1).detach()
+            # adv_images = torch.clamp(adv_images, min=0, max=1).detach()     # pixel-value clamp removed as we are dealing with embeddings, not images
+            adv_images = adv_images.detach()
 
         for _ in range(self.steps):
             adv_images.requires_grad = True
@@ -75,6 +76,7 @@ class PGD(Attack):
 
             adv_images = adv_images.detach() + self.alpha * grad.sign()
             delta = torch.clamp(adv_images - images, min=-self.eps, max=self.eps)
-            adv_images = torch.clamp(images + delta, min=0, max=1).detach()
+            # adv_images = torch.clamp(images + delta, min=0, max=1).detach()     # pixel-value clamp removed as we are dealing with embeddings, not images
+            adv_images = (images + delta).detach()
 
         return adv_images

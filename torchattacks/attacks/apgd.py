@@ -133,7 +133,7 @@ class APGD(Attack):
             ).detach() * t / (
                 (t ** 2).sum(dim=(1, 2, 3), keepdim=True).sqrt() + 1e-12
             )  # nopep8
-        # x_adv = x_adv.clamp(0.0, 1.0)     # Clamp removed as we are dealing with embeddings
+        # x_adv = x_adv.clamp(0.0, 1.0)     # pixel-value clamp removed as we are dealing with embeddings, not images
         x_best = x_adv.clone()
         x_best_adv = x_adv.clone()
         loss_steps = torch.zeros([self.steps, x.shape[0]])
