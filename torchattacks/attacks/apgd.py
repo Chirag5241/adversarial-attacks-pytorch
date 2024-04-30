@@ -88,13 +88,6 @@ class APGD(Attack):
     def dlr_loss(self, x, y):
         x_sorted, ind_sorted = x.sort(dim=1)
         ind = (ind_sorted[:, -1] == y).float()
-
-        if x.shape[1] <= 2:
-            print(
-                "dlr cannot be implemented for 2 classes, need 3 minimum, using crossentropy loss")
-            loss_fn = nn.CrossEntropyLoss(reduction="none")
-            return loss_fn(x, y)
-
         return -(
             x[np.arange(x.shape[0]), y]
             - x_sorted[:, -2] * ind
@@ -140,16 +133,21 @@ class APGD(Attack):
         loss_best_steps = torch.zeros([self.steps + 1, x.shape[0]])
         acc_steps = torch.zeros_like(loss_best_steps)
 
+        x_adv.requires_grad_()
+
         if self.loss == "ce":
             print("Cross Entropy loss")
             criterion_indiv = nn.CrossEntropyLoss(reduction="none")
         elif self.loss == "dlr":
             print("dlr loss")
             criterion_indiv = self.dlr_loss
+            if self.get_logits(x_adv).shape[1] <= 2:
+                print(
+                    "dlr cannot be implemented for 2 classes, need 3 minimum, using crossentropy loss")
+                criterion_indiv = nn.CrossEntropyLoss(reduction="none")
         else:
             raise ValueError("unknown loss")
 
-        x_adv.requires_grad_()
         grad = torch.zeros_like(x)
         for _ in range(self.eot_iter):
             with torch.enable_grad():
