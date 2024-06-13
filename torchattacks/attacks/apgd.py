@@ -136,14 +136,10 @@ class APGD(Attack):
         x_adv.requires_grad_()
 
         if self.loss == "ce":
-            print("Cross Entropy loss")
             criterion_indiv = nn.CrossEntropyLoss(reduction="none")
         elif self.loss == "dlr":
-            print("dlr loss")
             criterion_indiv = self.dlr_loss
             if self.get_logits(x_adv).shape[1] <= 2:
-                print(
-                    "dlr cannot be implemented for 2 classes, need 3 minimum, using crossentropy loss")
                 criterion_indiv = nn.CrossEntropyLoss(reduction="none")
         else:
             raise ValueError("unknown loss")
@@ -182,6 +178,7 @@ class APGD(Attack):
             loss_best.shape) == np.zeros(loss_best.shape)
 
         # n_reduced = 0
+
         for i in range(self.steps):
             # gradient step
             with torch.no_grad():
